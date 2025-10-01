@@ -5,7 +5,6 @@ const nextConfig = {
 
   // For Vercel monorepo deployment
   distDir: '.next',
-  output: 'standalone',
 
   images: {
     remotePatterns: [
