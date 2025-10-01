@@ -23,7 +23,18 @@ interface ApiResponse {
 }
 
 async function fetchFromBackend(filters: ProductFilters): Promise<ApiResponse> {
-    const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000'
+    // In production on Vercel, make requests to the server via internal routing
+    // In development, use the backend server URL
+    let backendUrl: string
+
+    if (process.env.NODE_ENV === 'production') {
+        // In production, use relative URL - Vercel will route internally
+        backendUrl = ''
+    } else {
+        // In development, use the backend server URL
+        backendUrl = process.env.BACKEND_URL || 'http://localhost:5000'
+    }
+
     const params = new URLSearchParams()
 
     if (filters.minPrice !== undefined) params.append('minPrice', filters.minPrice.toString())
@@ -31,7 +42,9 @@ async function fetchFromBackend(filters: ProductFilters): Promise<ApiResponse> {
     if (filters.minPopularity !== undefined) params.append('minPopularity', filters.minPopularity.toString())
     if (filters.maxPopularity !== undefined) params.append('maxPopularity', filters.maxPopularity.toString())
 
-    const url = params.toString() ? `${backendUrl}/api/products?${params.toString()}` : `${backendUrl}/api/products`
+    const url = params.toString()
+        ? `${backendUrl}/api/products?${params.toString()}`
+        : `${backendUrl}/api/products`
 
     const response = await fetch(url, {
         headers: {

@@ -7,7 +7,14 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors());
+// Configure CORS for Vercel deployment
+app.use(cors({
+    origin: process.env.NODE_ENV === 'production'
+        ? ['https://vercel.app', 'https://*.vercel.app']
+        : ['http://localhost:3000', 'http://localhost:5000'],
+    credentials: true
+}));
+
 app.use(express.json());
 
 let goldPriceData = {
@@ -16,6 +23,12 @@ let goldPriceData = {
     pricePerGram: 0,
     lastUpdated: null
 };
+
+// Initialize gold price on startup
+fetchGoldPrice();
+
+// Fetch gold price every 5 minutes
+setInterval(fetchGoldPrice, 5 * 60 * 1000);
 
 async function fetchGoldPrice() {
     try {
@@ -71,11 +84,13 @@ async function fetchGoldPrice() {
             }
         }
     } catch (error) {
+        console.error('Error fetching gold price:', error.message);
+        // Use fallback data if no current data exists
         if (goldPriceData.pricePerGram === 0) {
             goldPriceData = {
                 askPrice: 2020,
                 bidPrice: 2015,
-                pricePerGram: 0,
+                pricePerGram: 65.0, // Fallback price per gram
                 askSpread: 17,
                 bidSpread: 17,
                 spreadProfile: 'fallback',
@@ -135,6 +150,15 @@ const applyFilters = (products, filters) => {
 app.get('/api/products', (req, res) => {
     try {
         const products = loadProducts();
+
+        if (!products || products.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'No products found',
+                error: 'NO_PRODUCTS'
+            });
+        }
+
         const {
             minPrice,
             maxPrice,
@@ -186,24 +210,36 @@ app.get('/api/products', (req, res) => {
                         { min: filters.minPopularity, max: filters.maxPopularity } : null
                 }
             },
-            goldPrice: goldPriceData
+            goldPrice: goldPriceData,
+            warning: goldPriceData.spreadProfile === 'fallback' ? 'Using fallback gold price data' : undefined
         });
     } catch (error) {
+        console.error('Error in /api/products:', error);
         res.status(500).json({
             success: false,
             message: 'Error fetching products',
-            error: error.message
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
         });
     }
 });
 
 app.get('/health', (req, res) => {
-    res.json({ status: 'OK', timestamp: new Date().toISOString() });
+    res.json({
+        status: 'OK',
+        timestamp: new Date().toISOString(),
+        goldPrice: goldPriceData.lastUpdated ? 'Available' : 'Loading...',
+        environment: process.env.NODE_ENV || 'development'
+    });
 });
 
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+// Only start server in development mode
+// In production (Vercel), this will be handled by the serverless function
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+        console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+    });
+}
 
 // Export for Vercel
 module.exports = app;
