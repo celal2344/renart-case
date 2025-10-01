@@ -5,7 +5,10 @@ class ApiClient {
     private baseUrl: string
 
     constructor() {
-        this.baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
+        // In production, API calls will be routed to /api which maps to the server
+        // In development, use the full localhost URL
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
+        this.baseUrl = `${apiUrl}/api`
     }
 
     private async request<T>(

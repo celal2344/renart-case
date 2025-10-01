@@ -3,6 +3,10 @@ const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
 
+  // For Vercel monorepo deployment
+  distDir: '.next',
+  output: 'standalone',
+
   images: {
     remotePatterns: [
       {
@@ -19,6 +23,11 @@ const nextConfig = {
   },
   eslint: {
     ignoreDuringBuilds: false,
+  },
+
+  // Environment variables configuration
+  env: {
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000',
   },
 }
 

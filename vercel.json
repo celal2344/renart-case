@@ -1,0 +1,44 @@
+{
+    "version": 2,
+    "builds": [
+        {
+            "src": "server/index.js",
+            "use": "@vercel/node",
+            "config": {
+                "maxLambdaSize": "50mb"
+            }
+        },
+        {
+            "src": "client/package.json",
+            "use": "@vercel/static-build",
+            "config": {
+                "distDir": ".next"
+            }
+        }
+    ],
+    "routes": [
+        {
+            "src": "/api/(.*)",
+            "dest": "/server/index.js"
+        },
+        {
+            "src": "/health",
+            "dest": "/server/index.js"
+        },
+        {
+            "src": "/(_next/static/.*)",
+            "dest": "/client/$1"
+        },
+        {
+            "src": "/(.*\\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot))",
+            "dest": "/client/$1"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "/client/$1"
+        }
+    ],
+    "env": {
+        "NODE_ENV": "production"
+    }
+}

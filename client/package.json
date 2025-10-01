@@ -12,7 +12,10 @@
     "lint:fix": "next lint --fix",
     "type-check": "tsc --noEmit",
     "preview": "next build && next start",
-    "clean": "rm -rf .next out"
+    "clean": "rm -rf .next out",
+    "deploy": "vercel --prod",
+    "deploy:preview": "vercel",
+    "deploy:env": "vercel env pull .env.local"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
