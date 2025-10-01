@@ -1,12 +1,11 @@
 const ProductService = require('../services/ProductService');
-const GoldPriceService = require('../services/GoldPriceService');
 
 class ProductController {
     /**
      * @swagger
      * /api/products:
      *   get:
-     *     summary: Get all products with optional filtering
+     *     summary: Get all products with optional filtering and real-time gold prices
      *     tags: [Products]
      *     parameters:
      *       - in: query
@@ -37,7 +36,7 @@ class ProductController {
      *         description: Maximum popularity score filter (0-1)
      *     responses:
      *       200:
-     *         description: Successfully retrieved products
+     *         description: Successfully retrieved products with current gold prices
      *         content:
      *           application/json:
      *             schema:
@@ -53,8 +52,17 @@ class ProductController {
      *                   type: integer
      *                 filters:
      *                   $ref: '#/components/schemas/FilterInfo'
+     *                 goldPrice:
+     *                   type: object
+     *                   description: Current gold price information
      *       400:
      *         description: Invalid filter parameters
+     *         content:
+     *           application/json:
+     *             schema:
+     *               $ref: '#/components/schemas/Error'
+     *       503:
+     *         description: Gold price service unavailable
      *         content:
      *           application/json:
      *             schema:
@@ -71,63 +79,6 @@ class ProductController {
                 success: false,
                 message: error.message,
                 error: statusCode === 503 ? 'GOLD_PRICE_UNAVAILABLE' : 'INVALID_FILTER_PARAMS'
-            });
-        }
-    }
-
-    /**
-     * @swagger
-     * /api/products/gold-price:
-     *   get:
-     *     summary: Get current gold price information
-     *     tags: [Gold Price]
-     *     responses:
-     *       200:
-     *         description: Successfully retrieved gold price data
-     *         content:
-     *           application/json:
-     *             schema:
-     *               type: object
-     *               properties:
-     *                 success:
-     *                   type: boolean
-     *                 data:
-     *                   type: object
-     *       503:
-     *         description: Gold price data unavailable
-     */
-    async getGoldPrice(req, res) {
-        try {
-            const goldPriceData = GoldPriceService.getCurrentGoldPrice();
-            const hasValidData = goldPriceData.pricePerGram && goldPriceData.pricePerGram > 0;
-            const isStaleData = goldPriceData.lastUpdated &&
-                new Date() - new Date(goldPriceData.lastUpdated) > 24 * 60 * 60 * 1000;
-
-            if (!hasValidData) {
-                return res.status(503).json({
-                    success: false,
-                    message: 'Gold price data is currently unavailable',
-                    error: 'NO_PRICE_DATA',
-                    data: null
-                });
-            }
-
-            res.json({
-                success: true,
-                data: {
-                    ...goldPriceData,
-                    isStale: isStaleData,
-                    status: isStaleData ?
-                        'Data may be outdated - last updated ' + goldPriceData.lastUpdated :
-                        'Current market data'
-                },
-                warning: isStaleData ? 'Price data may be outdated' : null
-            });
-        } catch (error) {
-            res.status(500).json({
-                success: false,
-                message: error.message,
-                error: 'GOLD_PRICE_ERROR'
             });
         }
     }

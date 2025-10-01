@@ -1,6 +1,5 @@
 const express = require('express');
 const productRoutes = require('./products');
-const cronRoutes = require('./cron');
 
 const router = express.Router();
 
@@ -14,6 +13,5 @@ router.get('/health', (req, res) => {
 });
 
 router.use('/products', productRoutes);
-router.use('/cron', cronRoutes);
 
 module.exports = router;

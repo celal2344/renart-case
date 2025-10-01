@@ -3,7 +3,6 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const swaggerUi = require('swagger-ui-express');
-const cron = require('node-cron');
 
 const config = require('./config');
 const swaggerSpecs = require('./config/swagger');
@@ -96,24 +95,10 @@ class App {
             .catch(err => {
                 console.warn('Initial gold price fetch failed:', err.message);
                 console.log('Application will continue without pre-loaded gold price data');
-                console.log('Gold prices will be fetched on first request or via cron job');
+                console.log('Gold prices will be fetched on each product request');
             });
 
-        // Schedule gold price updates every hour
-        cron.schedule('0 * * * *', async () => {
-            console.log('Gold price update cron job started...');
-            try {
-                await GoldPriceService.fetchGoldPrice();
-                console.log('Gold price update cron job completed successfully');
-            } catch (error) {
-                console.error('Gold price update cron job failed:', error.message);
-                console.log('Will retry on next scheduled run');
-            }
-        }, {
-            timezone: 'UTC'
-        });
-
-        console.log('Gold price update scheduler initialized (runs every hour)');
+        console.log('Gold prices will be updated on each product request (real-time pricing)');
     }
 
     start() {

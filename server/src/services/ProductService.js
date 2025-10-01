@@ -34,27 +34,26 @@ class ProductService {
         }
 
         const products = this.productModel.getAll();
-        const currentGoldPrice = this.goldPriceService.getCurrentGoldPrice();
 
-        // Check if we have valid gold price data
-        if (!currentGoldPrice.pricePerGram || currentGoldPrice.pricePerGram === 0) {
-            // Try to fetch fresh data once
-            try {
-                await this.goldPriceService.fetchGoldPrice();
-                const updatedGoldPrice = this.goldPriceService.getCurrentGoldPrice();
-                if (!updatedGoldPrice.pricePerGram || updatedGoldPrice.pricePerGram === 0) {
-                    throw new Error('No gold price data available');
-                }
-            } catch (error) {
-                throw new Error('Unable to retrieve current gold prices. Please try again later or contact support if the issue persists.');
-            }
+        // Always update gold prices on every product request
+        try {
+            console.log('Updating gold prices for product request...');
+            await this.goldPriceService.fetchGoldPrice();
+        } catch (error) {
+            console.warn('Failed to update gold prices:', error.message);
+            // Continue with existing data if available
         }
 
         const goldPriceData = this.goldPriceService.getCurrentGoldPrice();
 
-        // Check if data is stale (older than 24 hours)
+        // Check if we have valid gold price data after update attempt
+        if (!goldPriceData.pricePerGram || goldPriceData.pricePerGram === 0) {
+            throw new Error('Unable to retrieve current gold prices. Please try again later or contact support if the issue persists.');
+        }
+
+        // Check if data is recent (within last hour for better freshness)
         const isStaleData = goldPriceData.lastUpdated &&
-            new Date() - new Date(goldPriceData.lastUpdated) > 24 * 60 * 60 * 1000;
+            new Date() - new Date(goldPriceData.lastUpdated) > 60 * 60 * 1000; // 1 hour instead of 24 hours
 
         let enrichedProducts = products.map((product, index) => ({
             ...product,
@@ -84,9 +83,11 @@ class ProductService {
             }
         };
 
-        // Add warning if data is stale
+        // Add info about real-time pricing
         if (isStaleData) {
-            response.warning = 'Gold price data may be outdated. Prices shown are based on the last available market data.';
+            response.warning = 'Gold price data may be outdated despite recent update attempt.';
+        } else {
+            response.info = 'Prices updated with current market data.';
         }
 
         return response;
