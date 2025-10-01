@@ -90,19 +90,24 @@ class App {
     }
 
     setupGoldPriceUpdates() {
-        // Initial gold price fetch
+        // Try initial gold price fetch - don't fail startup if it fails
         GoldPriceService.fetchGoldPrice()
-            .then(() => console.log('Initial gold price fetch completed'))
-            .catch(err => console.error('Initial gold price fetch failed:', err.message));
+            .then(() => console.log('Initial gold price fetch completed successfully'))
+            .catch(err => {
+                console.warn('Initial gold price fetch failed:', err.message);
+                console.log('Application will continue without pre-loaded gold price data');
+                console.log('Gold prices will be fetched on first request or via cron job');
+            });
 
         // Schedule gold price updates every hour
         cron.schedule('0 * * * *', async () => {
             console.log('Gold price update cron job started...');
             try {
                 await GoldPriceService.fetchGoldPrice();
-                console.log('Gold price update cron job completed');
+                console.log('Gold price update cron job completed successfully');
             } catch (error) {
                 console.error('Gold price update cron job failed:', error.message);
+                console.log('Will retry on next scheduled run');
             }
         }, {
             timezone: 'UTC'

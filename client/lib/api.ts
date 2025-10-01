@@ -1,4 +1,4 @@
-import type { Product, ProductFilters, ApiResponse, ApiError, FilterInfo } from '@/types'
+import type { Product, ProductFilters, ApiResponse, ApiError, FilterInfo, GoldPriceInfo } from '@/types'
 import { API_ENDPOINTS } from '@/lib/constants'
 
 class ApiClient {
@@ -52,6 +52,8 @@ class ApiClient {
         products: Product[]
         total: number
         filters: FilterInfo
+        goldPrice?: GoldPriceInfo
+        warning?: string
     }> {
         const params = new URLSearchParams()
 
@@ -72,6 +74,8 @@ class ApiClient {
             products: response.data,
             total: response.total,
             filters: response.filters,
+            goldPrice: response.goldPrice,
+            warning: response.warning,
         }
     }
 }

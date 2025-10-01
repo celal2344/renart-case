@@ -34,11 +34,21 @@ export interface FilterInfo {
     }
 }
 
+export interface GoldPriceInfo {
+    pricePerGram: number
+    lastUpdated?: string
+    platform?: string
+    spreadProfile?: string
+    isStale?: boolean
+}
+
 export interface ApiResponse<T> {
     success: boolean
     data: T
     total: number
     filters: FilterInfo
+    goldPrice?: GoldPriceInfo
+    warning?: string
     message?: string
 }
 

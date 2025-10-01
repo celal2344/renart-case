@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { useFilteredProducts } from './use-filtered-products'
 import { DEFAULT_RANGES } from '@/lib/constants'
-import type { ProductFilters, FilterInfo, Product } from '@/types'
+import type { ProductFilters, FilterInfo, Product, GoldPriceInfo } from '@/types'
 
 interface UseProductFiltersResult {
     filters: ProductFilters
@@ -11,6 +11,8 @@ interface UseProductFiltersResult {
     isLoading: boolean
     error: Error | null
     filterInfo: FilterInfo | null
+    goldPrice?: GoldPriceInfo
+    warning?: string
     ranges: {
         priceRange: { min: number; max: number }
         popularityRange: { min: number; max: number }
@@ -58,6 +60,8 @@ export const useProductFilters = (): UseProductFiltersResult => {
         isLoading,
         error,
         filterInfo: data?.filters || null,
+        goldPrice: data?.goldPrice,
+        warning: data?.warning,
         ranges,
         refetch,
     }

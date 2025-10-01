@@ -1,4 +1,5 @@
 const ProductService = require('../services/ProductService');
+const GoldPriceService = require('../services/GoldPriceService');
 
 class ProductController {
     /**
@@ -64,10 +65,69 @@ class ProductController {
             const result = await ProductService.getProducts(req.query);
             res.json(result);
         } catch (error) {
-            res.status(400).json({
+            // Check if it's a gold price error (503) or validation error (400)
+            const statusCode = error.message.includes('gold price') ? 503 : 400;
+            res.status(statusCode).json({
                 success: false,
                 message: error.message,
-                error: 'INVALID_FILTER_PARAMS'
+                error: statusCode === 503 ? 'GOLD_PRICE_UNAVAILABLE' : 'INVALID_FILTER_PARAMS'
+            });
+        }
+    }
+
+    /**
+     * @swagger
+     * /api/products/gold-price:
+     *   get:
+     *     summary: Get current gold price information
+     *     tags: [Gold Price]
+     *     responses:
+     *       200:
+     *         description: Successfully retrieved gold price data
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 success:
+     *                   type: boolean
+     *                 data:
+     *                   type: object
+     *       503:
+     *         description: Gold price data unavailable
+     */
+    async getGoldPrice(req, res) {
+        try {
+            const goldPriceData = GoldPriceService.getCurrentGoldPrice();
+            const hasValidData = goldPriceData.pricePerGram && goldPriceData.pricePerGram > 0;
+            const isStaleData = goldPriceData.lastUpdated && 
+                new Date() - new Date(goldPriceData.lastUpdated) > 24 * 60 * 60 * 1000;
+            
+            if (!hasValidData) {
+                return res.status(503).json({
+                    success: false,
+                    message: 'Gold price data is currently unavailable',
+                    error: 'NO_PRICE_DATA',
+                    data: null
+                });
+            }
+            
+            res.json({
+                success: true,
+                data: {
+                    ...goldPriceData,
+                    isStale: isStaleData,
+                    status: isStaleData ? 
+                        'Data may be outdated - last updated ' + goldPriceData.lastUpdated : 
+                        'Current market data'
+                },
+                warning: isStaleData ? 'Price data may be outdated' : null
+            });
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                message: error.message,
+                error: 'GOLD_PRICE_ERROR'
             });
         }
     }

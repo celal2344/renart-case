@@ -17,7 +17,7 @@ class GoldPriceService {
 
         try {
             const response = await axios.get(config.goldPrice.apiUrl, {
-                timeout: 10000
+                timeout: 5000  // Reduced timeout for Vercel compatibility
             });
 
             if (response.data && response.data.length > 0) {
@@ -26,6 +26,7 @@ class GoldPriceService {
                 if (selectedQuote.quote && selectedQuote.platform) {
                     const priceData = this._calculatePriceData(selectedQuote.quote, selectedQuote.platform);
                     this.goldPrice.updateData(priceData);
+                    console.log(`Gold price updated successfully: ${priceData.pricePerGram}/gram`);
                 } else {
                     throw new Error('No valid quote found in API response');
                 }
@@ -33,9 +34,9 @@ class GoldPriceService {
                 throw new Error('Invalid API response format');
             }
         } catch (error) {
-            if (this.goldPrice.getPricePerGram() === 0) {
-                this.goldPrice.setFallbackData();
-            }
+            console.error('Gold price API failed:', error.message);
+            // Don't use fallback - throw error to let caller handle it
+            throw new Error(`Unable to fetch current gold prices: ${error.message}`);
         } finally {
             this.isUpdating = false;
         }
