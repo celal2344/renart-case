@@ -51,9 +51,9 @@ class ProductService {
         }
 
         const goldPriceData = this.goldPriceService.getCurrentGoldPrice();
-        
+
         // Check if data is stale (older than 24 hours)
-        const isStaleData = goldPriceData.lastUpdated && 
+        const isStaleData = goldPriceData.lastUpdated &&
             new Date() - new Date(goldPriceData.lastUpdated) > 24 * 60 * 60 * 1000;
 
         let enrichedProducts = products.map((product, index) => ({

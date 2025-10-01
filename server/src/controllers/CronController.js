@@ -25,10 +25,10 @@ class CronController {
     async updateGoldPrice(req, res) {
         try {
             console.log('Cron job triggered: Updating gold price...');
-            
+
             await GoldPriceService.fetchGoldPrice();
             const currentData = GoldPriceService.getCurrentGoldPrice();
-            
+
             res.json({
                 success: true,
                 message: 'Gold price updated successfully',

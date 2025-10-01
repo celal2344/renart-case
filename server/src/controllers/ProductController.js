@@ -100,9 +100,9 @@ class ProductController {
         try {
             const goldPriceData = GoldPriceService.getCurrentGoldPrice();
             const hasValidData = goldPriceData.pricePerGram && goldPriceData.pricePerGram > 0;
-            const isStaleData = goldPriceData.lastUpdated && 
+            const isStaleData = goldPriceData.lastUpdated &&
                 new Date() - new Date(goldPriceData.lastUpdated) > 24 * 60 * 60 * 1000;
-            
+
             if (!hasValidData) {
                 return res.status(503).json({
                     success: false,
@@ -111,14 +111,14 @@ class ProductController {
                     data: null
                 });
             }
-            
+
             res.json({
                 success: true,
                 data: {
                     ...goldPriceData,
                     isStale: isStaleData,
-                    status: isStaleData ? 
-                        'Data may be outdated - last updated ' + goldPriceData.lastUpdated : 
+                    status: isStaleData ?
+                        'Data may be outdated - last updated ' + goldPriceData.lastUpdated :
                         'Current market data'
                 },
                 warning: isStaleData ? 'Price data may be outdated' : null

@@ -13,10 +13,12 @@
             "dest": "/server.js"
         }
     ],
-    "crons": [{
-        "path": "/api/cron",
-        "schedule": "0 */6 * * *"
-    }],
+    "crons": [
+        {
+            "path": "/api/cron",
+            "schedule": "0 10 * * *"
+        }
+    ],
     "env": {
         "NODE_ENV": "production",
         "PORT": "3000",
