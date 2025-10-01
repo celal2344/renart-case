@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
-const cron = require('node-cron');
 const fs = require('fs');
 const path = require('path');
 
@@ -89,8 +88,6 @@ async function fetchGoldPrice() {
     }
 }
 
-cron.schedule('0 * * * *', fetchGoldPrice);
-fetchGoldPrice();
 
 const loadProducts = () => {
     try {

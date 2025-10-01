@@ -4,7 +4,7 @@ An Node.js + Express.js server that returns products data with real time gold pr
 
 ## Features
 
-- Real-time gold price updates using cron jobs
+- Real-time gold price updates
 - Swagger API documentation
 - Security middleware (helmet, rate limiting)
 - CORS support

@@ -23,11 +23,5 @@
             "src": "/(.*)",
             "dest": "/client/$1"
         }
-    ],
-    "crons": [
-        {
-            "path": "/api/cron",
-            "schedule": "15 2 * * *"
-        }
     ]
 }
