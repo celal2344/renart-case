@@ -49,9 +49,8 @@ async function fetchFromBackend(filters: ProductFilters): Promise<ApiResponse> {
 }
 
 export async function GET(request: NextRequest) {
+    const searchParams = request.nextUrl.searchParams
     try {
-        const { searchParams } = new URL(request.url)
-
         const filters: ProductFilters = {}
 
         const minPrice = searchParams.get('minPrice')
