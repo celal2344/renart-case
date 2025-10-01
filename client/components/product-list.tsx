@@ -2,7 +2,6 @@
 
 import ProductCarousel from "./product-carousel"
 import ProductFilters from "./product-filters"
-import { GoldPriceStatus } from "./gold-price-status"
 import { useProductFilters } from "@/hooks/use-product-filters"
 import { ProductListSkeleton } from "@/components/ui/loading"
 import { ErrorFallback } from "@/components/error-boundary"
@@ -16,8 +15,6 @@ export default function ProductList() {
     isLoading,
     error,
     ranges,
-    goldPrice,
-    warning,
     refetch
   } = useProductFilters()
 
@@ -44,7 +41,6 @@ export default function ProductList() {
         </h1>
       </header>
 
-      <GoldPriceStatus goldPrice={goldPrice} warning={warning} />
 
       <ProductFilters
         filters={filters}

@@ -54,8 +54,8 @@ class GoldPrice {
         // Updated fallback to reflect more current gold prices (~$124/gram instead of $65)
         // This prevents the "halved price" issue when API fails on Vercel
         this.data = {
-            askPrice: 3850,  // Updated from 2020
-            bidPrice: 3845,  // Updated from 2015
+            askPrice: 0,  // Updated from 2020
+            bidPrice: 0,  // Updated from 2015
             pricePerGram: 124, // Updated from 65 to match current market rates
             askSpread: 17,
             bidSpread: 17,

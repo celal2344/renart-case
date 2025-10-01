@@ -35,7 +35,6 @@ class GoldPriceService {
             }
         } catch (error) {
             console.error('Gold price API failed:', error.message);
-            // Don't use fallback - throw error to let caller handle it
             throw new Error(`Unable to fetch current gold prices: ${error.message}`);
         } finally {
             this.isUpdating = false;

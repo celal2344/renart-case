@@ -76,7 +76,7 @@ async function fetchGoldPrice() {
             goldPriceData = {
                 askPrice: 2020,
                 bidPrice: 2015,
-                pricePerGram: 65,
+                pricePerGram: 0,
                 askSpread: 17,
                 bidSpread: 17,
                 spreadProfile: 'fallback',
