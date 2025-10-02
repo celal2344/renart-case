@@ -62,7 +62,7 @@ export function ProductListSkeleton() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {Array.from({ length: 8 }).map((_, i) => (
+                {Array.from({ length: 4 }).map((_, i) => (
                     <LoadingCard key={i} />
                 ))}
             </div>

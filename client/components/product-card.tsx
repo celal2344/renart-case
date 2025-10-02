@@ -4,6 +4,7 @@ import { useState, memo } from "react"
 import Image from "next/image"
 import type { Product } from "@/types"
 import { COLOR_OPTIONS } from "@/lib/constants"
+import { LoadingSpinner } from "./ui/loading"
 
 interface ProductCardProps {
   product: Product
@@ -57,16 +58,30 @@ StarRating.displayName = "StarRating"
 function ProductCard({ product }: ProductCardProps) {
   const [selectedColorIndex, setSelectedColorIndex] = useState(0)
   const [imageLoading, setImageLoading] = useState(true)
+  const [colorChanging, setColorChanging] = useState(false)
 
   const currentColor = COLOR_OPTIONS[selectedColorIndex]
   const currentImage = product.images[currentColor.imageKey]
+
+  const handleColorChange = (index: number) => {
+    if (index !== selectedColorIndex) {
+      setColorChanging(true)
+      setImageLoading(true)
+      setSelectedColorIndex(index)
+    }
+  }
 
   return (
     <article className="bg-card rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 group">
       {/* Product Image */}
       <div className="relative aspect-square bg-secondary">
-        {imageLoading && (
-          <div className="absolute inset-0 bg-muted animate-pulse rounded-t-lg" />
+        {imageLoading && !colorChanging && (
+          <div className="absolute inset-0 bg-muted rounded-t-lg z-10" />
+        )}
+        {colorChanging && (
+          <div className="absolute inset-0 bg-muted/80 rounded-t-lg z-10 flex items-center justify-center">
+            <LoadingSpinner size="md" className="text-primary" />
+          </div>
         )}
         <Image
           src={currentImage || "/placeholder.svg"}
@@ -74,7 +89,10 @@ function ProductCard({ product }: ProductCardProps) {
           fill
           className="object-cover group-hover:scale-105 transition-transform duration-300"
           sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
-          onLoad={() => setImageLoading(false)}
+          onLoad={() => {
+            setImageLoading(false)
+            setColorChanging(false)
+          }}
           priority={false}
         />
       </div>
@@ -87,9 +105,6 @@ function ProductCard({ product }: ProductCardProps) {
 
         <p className="font-montserrat text-[15px] font-medium text-foreground mb-4">
           ${product.price.toFixed(2)} USD
-          <span className="text-[12px] text-muted-foreground block">
-            ${product.pricePerGram.toFixed(2)}/gram
-          </span>
         </p>
 
         {/* Color Picker */}
@@ -104,14 +119,21 @@ function ProductCard({ product }: ProductCardProps) {
                 role="radio"
                 aria-checked={selectedColorIndex === index}
                 aria-label={`Select ${color.name}`}
-                className={`w-8 h-8 rounded-full border-2 transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${selectedColorIndex === index
-                    ? "border-foreground scale-110"
-                    : "border-border hover:border-muted-foreground"
-                  }`}
+                disabled={colorChanging}
+                className={`w-8 h-8 rounded-full border-2 transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 relative ${selectedColorIndex === index
+                  ? "border-foreground scale-110"
+                  : "border-border hover:border-muted-foreground"
+                  } ${colorChanging ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
                 style={{ backgroundColor: color.hex }}
-                onClick={() => setSelectedColorIndex(index)}
+                onClick={() => handleColorChange(index)}
                 title={color.name}
-              />
+              >
+                {colorChanging && selectedColorIndex === index && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <LoadingSpinner size="sm" className="text-foreground" />
+                  </div>
+                )}
+              </button>
             ))}
           </div>
         </div>
